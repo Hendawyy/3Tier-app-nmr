@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  # namespace: 3-tier-app-eks
+  name: backend-deployment
+  labels:
+    app: backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: 384747603695.dkr.ecr.us-east-1.amazonaws.com/hendawy-ecr-back:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: MYSQL_HOST
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: MYSQL_HOST
+        - name: MYSQL_PORT
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: MYSQL_PORT
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: MYSQL_USER
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: MYSQL_PASSWORD
+        - name: MYSQL_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: MYSQL_DATABASE
+        - name: REDIS_HOST
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: REDIS_HOST
+        - name: REDIS_PORT
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: REDIS_PORT
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: REDIS_PASSWORD
+        volumeMounts:
+        - name: backend-storage
+          mountPath: /app/data
+      volumes:
+      - name: backend-storage
+        persistentVolumeClaim:
+          claimName: my-ebs-pvc

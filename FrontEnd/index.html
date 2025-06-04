@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="assets/ico.png" type="image/png" />
+  <title>Simple 3-Tier App</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #1e2a38;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      text-align: center;
+      padding: 40px;
+      max-width: 800px;
+      width: 90%;
+    }
+
+    h1, p {
+      text-shadow: 1px 1px 3px #000000;
+    }
+
+    h1 {
+      font-size: 3em;
+      margin-bottom: 10px;
+    }
+
+    p {
+      font-size: 1.5em;
+    }
+
+    img.logo {
+      width: 180px;
+      height: auto;
+      margin: 30px 0;
+      border-radius: 50%;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    button {
+      background-color: #00bfa5;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 1.2em;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s, background-color 0.3s;
+      margin: 10px;
+    }
+
+    button:hover {
+      background-color: #009e87;
+      transform: scale(1.05);
+    }
+
+    #status {
+      margin-top: 20px;
+      font-size: 1.2em;
+      color: #ffeb3b;
+    }
+  </style>
+  <script>
+    const backendUrl = "/api/increment";
+
+    async function updateCounter() {
+      try {
+        const response = await fetch(backendUrl);
+        const data = await response.json();
+        document.getElementById("counter").innerText = "Counter: " + data.counter;
+      } catch (error) {
+        console.error("Error fetching counter:", error);
+        document.getElementById("status").innerText = "❌ Error updating counter";
+      }
+    }
+
+    async function testMysql() {
+      try {
+        const res = await fetch("/mysql");
+        const text = await res.text();
+        document.getElementById("status").innerText = "MySQL: " + text;
+      } catch (error) {
+        document.getElementById("status").innerText = "❌ MySQL test failed";
+      }
+    }
+
+    async function testRedis() {
+      try {
+        const res = await fetch("/redis");
+        const text = await res.text();
+        document.getElementById("status").innerText = "Redis: " + text;
+      } catch (error) {
+        document.getElementById("status").innerText = "❌ Redis test failed";
+      }
+    }
+
+    window.onload = updateCounter;
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h1>Welcome to the Simple 3-Tier Web Application</h1>
+    <img src="assets/1.png" alt="Logo" class="logo" />
+    <p>My Name Is Seif Hendawy, I am A DevOps Engineer.</p>
+    <p id="counter">Counter: 0</p>
+    <button onclick="updateCounter()">Increment</button>
+    <br />
+    <button onclick="testMysql()">Test MySQL Connection</button>
+    <button onclick="testRedis()">Test Redis Connection</button>
+    <p id="status"></p>
+  </div>
+</body>
+</html>

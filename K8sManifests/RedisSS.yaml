@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis
+  # namespace: 3-tier-app-eks
+spec:
+  serviceName: "redis"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:7.0
+        ports:
+          - containerPort: 6379
+        env:
+          - name: REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: app-secrets
+                key: REDIS_PASSWORD
+        volumeMounts:
+          - name: redis-persistent-storage
+            mountPath: /data
+        command: ["/bin/sh", "-c"]
+        args:
+          - exec redis-server --appendonly yes --requirepass "$REDIS_PASSWORD"
+
+  volumeClaimTemplates:
+    - metadata:
+        name: redis-persistent-storage
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: ebs-sc
+        resources:
+          requests:
+            storage: 2Gi
