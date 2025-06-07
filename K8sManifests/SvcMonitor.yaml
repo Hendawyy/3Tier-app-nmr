@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: backend-service-monitor
+  namespace: monitoring
+  labels:
+    release: prom-graf
+spec:
+  namespaceSelector:
+    matchNames:
+      - 3-tier-app-eks
+  selector:
+    matchLabels:
+      app: backend
+  endpoints:
+  - port: metrics
+    interval: 15s
+    path: /metrics

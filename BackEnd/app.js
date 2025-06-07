@@ -3,9 +3,14 @@ const express = require("express");
 const cors = require("cors");
 const mysql = require("mysql2/promise");
 const redis = require("redis");
+const client = require('prom-client');
+const register = client.register;
 
 const app = express();
 const port = process.env.PORT || 3000;
+
+// Prometheus metrics endpoint
+client.collectDefaultMetrics({ register });
 
 // MySQL connection pool
 const db = mysql.createPool({
@@ -113,6 +118,37 @@ app.get("/redis", async (req, res) => {
   } catch (err) {
     console.error("Redis test error:", err);
     res.status(500).send("Redis test failed");
+  }
+});
+
+// Create HTTP request duration histogram
+const httpRequestDurationMicroseconds = new client.Histogram({
+  name: 'http_request_duration_seconds',
+  help: 'Duration of HTTP requests in seconds',
+  labelNames: ['method', 'route', 'status_code'],
+  registers: [register],
+});
+
+
+
+// Middleware to observe request durations
+app.use((req, res, next) => {
+  const end = httpRequestDurationMicroseconds.startTimer();
+  res.on('finish', () => {
+    const routePath = req.route ? req.route.path : req.path; // safe fallback
+    end({ method: req.method, route: routePath, status_code: res.statusCode });
+  });
+  next();
+});
+
+
+// Add /metrics endpoint for Prometheus scraping
+app.get('/metrics', async (req, res) => {
+  try {
+    res.set('Content-Type', register.contentType);
+    res.end(await register.metrics());
+  } catch (ex) {
+    res.status(500).end(ex);
   }
 });
 
