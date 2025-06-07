@@ -6,9 +6,10 @@ metadata:
   labels:
     release: prom-graf
 spec:
+  jobLabel: monitoring-app-backend
   namespaceSelector:
     matchNames:
-      - 3-tier-app-eks
+      - my-app-namespace
   selector:
     matchLabels:
       app: backend
